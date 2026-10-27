@@ -52,6 +52,21 @@ object Prefs {
         get() = sp.getInt("volume", 55)
         set(v) = sp.edit().putInt("volume", v).apply()
 
+    /** 音乐淡入时长（秒），0 = 直接起音 */
+    var fadeInSec: Int
+        get() = sp.getInt("fade_in", 3)
+        set(v) = sp.edit().putInt("fade_in", v).apply()
+
+    /** 音乐淡出时长（秒），0 = 直接切断；用于每首歌结束前的收尾 */
+    var fadeOutSec: Int
+        get() = sp.getInt("fade_out", 4)
+        set(v) = sp.edit().putInt("fade_out", v).apply()
+
+    /** 音乐随机顺序：开启后每次载入相册都重新洗牌，起点不固定 */
+    var musicShuffle: Boolean
+        get() = sp.getBoolean("music_shuffle", true)
+        set(v) = sp.edit().putBoolean("music_shuffle", v).apply()
+
     /** 防烧屏：开启后启用缓慢推拉，并让每张图的取景随机偏移 */
     var antiBurnIn: Boolean
         get() = sp.getBoolean("burnin", true)
