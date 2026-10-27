@@ -13,11 +13,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.bumptech.glide.Glide
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -91,7 +93,7 @@ class MainActivity : AppCompatActivity() {
 
         if (Prefs.needReload) {
             Prefs.needReload = false
-            loadAlbum()
+            loadAlbum(clearCache = true)
         } else if (Prefs.manifestUrl != loadedUrl) {
             loadAlbum()
         } else if (currentAlbum != null) {
@@ -172,7 +174,7 @@ class MainActivity : AppCompatActivity() {
 
     // ------------------------------------------------------------ 数据
 
-    private fun loadAlbum() {
+    private fun loadAlbum(clearCache: Boolean = false) {
         if (loading) return
         val url = Prefs.manifestUrl
         if (url.isBlank()) {
@@ -183,6 +185,18 @@ class MainActivity : AppCompatActivity() {
         showStatus("正在读取相册…")
 
         uiScope.launch {
+            // 手动"重新载入"时把图片缓存清干净，删掉/换掉的照片不会从缓存里冒出来。
+            // 必须在拉清单之前清完，否则会和随后的加载抢同一份磁盘缓存。
+            if (clearCache) {
+                try {
+                    Glide.get(applicationContext).clearMemory()
+                    withContext(Dispatchers.IO) {
+                        Glide.get(applicationContext).clearDiskCache()
+                    }
+                } catch (_: Exception) {
+                }
+            }
+
             try {
                 val album = repo.load(url)
                 if (album.photos.isEmpty()) {
