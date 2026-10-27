@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">乐格相框</string>
+    <string name="dream_name">乐格相框屏保</string>
+
+    <string name="settings_title">设置</string>
+    <string name="loading">正在读取相册…</string>
+    <string name="empty_album">相册为空，请检查清单地址</string>
+    <string name="load_failed">读取失败：%1$s</string>
+    <string name="retry_hint">按 OK 重试 · 按菜单键进设置</string>
+
+    <string name="item_manifest">相册清单地址</string>
+    <string name="item_duration">每张停留</string>
+    <string name="item_transition">转场效果</string>
+    <string name="item_decode">解码画质</string>
+    <string name="item_music">背景音乐</string>
+    <string name="item_volume">音乐音量</string>
+    <string name="item_burnin">防烧屏微移</string>
+    <string name="item_night">夜间息屏</string>
+    <string name="item_night_range">息屏时段</string>
+    <string name="item_clock">显示时钟</string>
+    <string name="item_shuffle">随机播放</string>
+    <string name="item_dream">系统屏保</string>
+    <string name="item_reload">重新载入相册</string>
+
+    <string name="on">开启</string>
+    <string name="off">关闭</string>
+    <string name="seconds">%1$d 秒</string>
+    <string name="save">保存</string>
+    <string name="cancel">取消</string>
+    <string name="ok">确定</string>
+    <string name="done">完成</string>
+</resources>
