@@ -11,8 +11,8 @@ android {
         applicationId = "com.leog.photoframe"
         minSdk = 21
         targetSdk = 30
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 3
+        versionName = "1.2.0"
     }
 
     buildTypes {
