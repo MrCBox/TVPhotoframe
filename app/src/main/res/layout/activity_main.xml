@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg">
+
+    <ImageView
+        android:id="@+id/imgA"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@null"
+        android:scaleType="centerCrop" />
+
+    <ImageView
+        android:id="@+id/imgB"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@null"
+        android:scaleType="centerCrop" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:layout_gravity="top"
+        android:background="@drawable/scrim_top" />
+
+    <TextView
+        android:id="@+id/clock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="30dp"
+        android:layout_marginEnd="44dp"
+        android:shadowColor="#AA000000"
+        android:shadowRadius="8"
+        android:textColor="#F0F4F3"
+        android:textSize="36sp" />
+
+    <TextView
+        android:id="@+id/caption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_marginStart="44dp"
+        android:layout_marginBottom="30dp"
+        android:shadowColor="#AA000000"
+        android:shadowRadius="6"
+        android:textColor="#CCF0F4F3"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:lineSpacingExtra="6dp"
+        android:paddingLeft="40dp"
+        android:paddingRight="40dp"
+        android:textColor="@color/text_secondary"
+        android:textSize="20sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="90dp"
+        android:background="#B3000000"
+        android:paddingLeft="24dp"
+        android:paddingTop="10dp"
+        android:paddingRight="24dp"
+        android:paddingBottom="10dp"
+        android:textColor="#F0F4F3"
+        android:textSize="16sp"
+        android:visibility="gone" />
+
+    <!-- 夜间息屏遮罩 -->
+    <View
+        android:id="@+id/nightMask"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FF000000"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/nightClock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:alpha="0.28"
+        android:textColor="#FF9FB0AD"
+        android:textSize="44sp"
+        android:visibility="gone" />
+
+</FrameLayout>
