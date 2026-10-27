@@ -14,6 +14,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.bumptech.glide.signature.ObjectKey
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -180,6 +181,8 @@ class SlideshowController(
         Glide.with(ctx)
             .load(photo.url)
             .override(dw, dh)
+            // 签名 = 清单版本：清单变了缓存自然失效，避免已删除的照片从缓存里"复活"
+            .signature(ObjectKey(a.version))
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .listener(object : RequestListener<Drawable> {
                 override fun onLoadFailed(
