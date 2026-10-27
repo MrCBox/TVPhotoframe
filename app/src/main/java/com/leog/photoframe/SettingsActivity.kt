@@ -46,6 +46,9 @@ class SettingsActivity : AppCompatActivity() {
         items.add(SettingItem("decode", "解码画质", decodeLabel(Prefs.decodeWidth)))
         items.add(SettingItem("music", "背景音乐", onOff(Prefs.musicEnabled)))
         items.add(SettingItem("volume", "音乐音量", "${Prefs.volume}%"))
+        items.add(SettingItem("mshuffle", "音乐随机顺序", onOff(Prefs.musicShuffle)))
+        items.add(SettingItem("fadein", "音乐淡入", fadeLabel(Prefs.fadeInSec)))
+        items.add(SettingItem("fadeout", "音乐淡出", fadeLabel(Prefs.fadeOutSec)))
         items.add(SettingItem("burnin", "缓慢推近（兼防烧屏）", onOff(Prefs.antiBurnIn)))
         items.add(SettingItem("shuffle", "随机播放", onOff(Prefs.shuffle)))
         items.add(SettingItem("clock", "显示时钟与拍摄时间", onOff(Prefs.showClock)))
@@ -57,6 +60,8 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun onOff(b: Boolean) = if (b) "开启" else "关闭"
+
+    private fun fadeLabel(sec: Int) = if (sec <= 0) "关闭（直接切换）" else "$sec 秒"
 
     private fun decodeLabel(w: Int): String = when (w) {
         0 -> "跟随屏幕"
@@ -83,6 +88,18 @@ class SettingsActivity : AppCompatActivity() {
                 "音乐音量", intArrayOf(20, 40, 55, 70, 85, 100),
                 Prefs.volume, { "$it%" }
             ) { Prefs.volume = it }
+            "mshuffle" -> {
+                Prefs.musicShuffle = !Prefs.musicShuffle
+                refresh()
+            }
+            "fadein" -> chooseNumber(
+                "音乐淡入（每首开始）", intArrayOf(0, 1, 2, 3, 5, 8),
+                Prefs.fadeInSec, { fadeLabel(it) }
+            ) { Prefs.fadeInSec = it }
+            "fadeout" -> chooseNumber(
+                "音乐淡出（每首结束前）", intArrayOf(0, 1, 2, 3, 4, 6, 8),
+                Prefs.fadeOutSec, { fadeLabel(it) }
+            ) { Prefs.fadeOutSec = it }
             "music" -> {
                 Prefs.musicEnabled = !Prefs.musicEnabled
                 refresh()
