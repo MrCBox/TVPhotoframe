@@ -100,6 +100,8 @@ class MainActivity : AppCompatActivity() {
             controller.reorderKeepCurrent()
             controller.resume()
             music.setVolume(Prefs.volume / 100f)
+            music.setFade(Prefs.fadeInSec, Prefs.fadeOutSec)
+            if (Prefs.musicEnabled) music.resume() else music.pause()
         }
 
         applyNightMode()
@@ -211,6 +213,9 @@ class MainActivity : AppCompatActivity() {
 
                 music.setPlaylist(album.music)
                 music.setVolume(Prefs.volume / 100f)
+                music.setFade(Prefs.fadeInSec, Prefs.fadeOutSec)
+                // 真正起播（之前只 setPlaylist 不会发声）；每次载入都从随机一首开始
+                if (Prefs.musicEnabled) music.start() else music.pause()
                 music.trimCache()
 
                 showStatus(null)
