@@ -13,6 +13,7 @@ import okhttp3.Request
 import java.io.File
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 
 /**
  * 背景音乐：从清单里的 music 列表顺序播放，切曲时淡入淡出，失败自动跳过下一首。
@@ -37,10 +38,21 @@ class MusicPlayer(private val ctx: Context) {
     private var player: MediaPlayer? = null
     private var volumeAnim: ValueAnimator? = null
 
-    private var playlist: List<String> = emptyList()
-    private var cursor = -1
+    /** 清单里的原始顺序 */
+    private var source: List<String> = emptyList()
+
+    /** 洗牌袋：一轮内的播放顺序，播空后重新洗牌 */
+    private val queue = ArrayList<String>()
+
+    /** 上一首，用于避免新一轮的第一首和它撞车 */
+    private var lastPlayed: String? = null
+
     private var wantPlaying = false
     private var targetVolume = 0.55f
+
+    /** 淡入 / 淡出时长（毫秒），0 表示不使用 */
+    private var fadeInMs = 3000L
+    private var fadeOutMs = 4000L
 
     /** 递增令牌，用于丢弃过期的下载回调 */
     private var token = 0
@@ -48,9 +60,23 @@ class MusicPlayer(private val ctx: Context) {
     /** 连续失败计数，连续 5 首拿不到就停，避免无限重试白耗流量 */
     private var failStreak = 0
 
+    /**
+     * 设置播放列表。
+     *
+     * 每次调用都会清空洗牌袋，于是下一首开始就是一次全新的随机顺序——
+     * 电视每次开机、每次"重新载入相册"都不会总是同一首开头。
+     * 正在播放的曲目不受影响（不会因为重载相册而中途被打断）。
+     */
     fun setPlaylist(list: List<String>) {
-        playlist = list
-        cursor = -1
+        source = list
+        queue.clear()
+        lastPlayed = null
+    }
+
+    /** 淡入 / 淡出，单位秒。运行中修改会在下一次起音 / 下一首生效 */
+    fun setFade(fadeInSec: Int, fadeOutSec: Int) {
+        fadeInMs = (fadeInSec.coerceIn(0, 15) * 1000L)
+        fadeOutMs = (fadeOutSec.coerceIn(0, 15) * 1000L)
     }
 
     fun setVolume(v: Float) {
@@ -64,7 +90,7 @@ class MusicPlayer(private val ctx: Context) {
     }
 
     fun start() {
-        if (playlist.isEmpty()) return
+        if (source.isEmpty()) return
         wantPlaying = true
         if (player == null) playNext()
     }
@@ -72,11 +98,13 @@ class MusicPlayer(private val ctx: Context) {
     fun pause() {
         wantPlaying = false
         token++
-        fadeTo(targetVolume, 0f, 700) { releasePlayer() }
+        // 暂停用短淡出，等 4 秒才静音手感太拖；上限 1.5 秒
+        val ms = fadeOutMs.coerceAtMost(1500L)
+        if (ms <= 0L) releasePlayer() else fadeTo(targetVolume, 0f, ms) { releasePlayer() }
     }
 
     fun resume() {
-        if (playlist.isEmpty()) return
+        if (source.isEmpty()) return
         wantPlaying = true
         if (player == null) playNext()
     }
@@ -90,11 +118,34 @@ class MusicPlayer(private val ctx: Context) {
 
     // ---------------- 播放流程 ----------------
 
+    /**
+     * 从洗牌袋里取下一首。袋空了就重新洗牌，
+     * 并保证新一轮的第一首不与上一首重复——否则两轮交界处会连着放同一曲。
+     */
+    private fun takeNext(): String? {
+        if (source.isEmpty()) return null
+        if (queue.isEmpty()) {
+            val bag = if (Prefs.musicShuffle) {
+                source.shuffled().toMutableList()
+            } else {
+                source.toMutableList()
+            }
+            if (bag.size > 1 && bag[0] == lastPlayed) {
+                val j = 1 + Random.nextInt(bag.size - 1)
+                val tmp = bag[0]
+                bag[0] = bag[j]
+                bag[j] = tmp
+            }
+            queue.addAll(bag)
+        }
+        if (queue.isEmpty()) return null
+        return queue.removeAt(0).also { lastPlayed = it }
+    }
+
     private fun playNext() {
-        if (!wantPlaying || playlist.isEmpty()) return
+        if (!wantPlaying) return
+        val url = takeNext() ?: return
         releasePlayer()
-        cursor = (cursor + 1) % playlist.size
-        val url = playlist[cursor]
         val myToken = ++token
 
         io.execute {
@@ -136,10 +187,25 @@ class MusicPlayer(private val ctx: Context) {
                     return@setOnPreparedListener
                 }
                 try {
-                    p.setVolume(0f, 0f)
+                    if (fadeInMs > 0L) {
+                        p.setVolume(0f, 0f)
+                    } else {
+                        p.setVolume(targetVolume, targetVolume)
+                    }
                     p.start()
                     failStreak = 0
-                    fadeTo(0f, targetVolume, 1600)
+                    if (fadeInMs > 0L) fadeTo(0f, targetVolume, fadeInMs)
+
+                    // 结束前提前开始淡出，避免 cut 在最后一个音上
+                    val dur = p.duration
+                    if (fadeOutMs > 0L && dur > fadeOutMs + 1000L) {
+                        val delay = dur - fadeOutMs - 300L
+                        handler.postDelayed({
+                            if (myToken == token && wantPlaying) {
+                                fadeTo(targetVolume, 0f, fadeOutMs)
+                            }
+                        }, delay)
+                    }
                 } catch (_: Exception) {
                     scheduleNext(1500)
                 }
