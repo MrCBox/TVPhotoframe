@@ -48,6 +48,7 @@ class PhotoFrameDream : DreamService() {
                 slideshow.start()
                 player.setPlaylist(album.music)
                 player.setVolume(Prefs.volume / 100f)
+                player.setFade(Prefs.fadeInSec, Prefs.fadeOutSec)
                 if (Prefs.musicEnabled && album.music.isNotEmpty()) player.start()
             } catch (_: Exception) {
                 // 屏保拉不到清单就保持黑屏，不弹任何错误
