@@ -37,6 +37,8 @@ class ManifestRepository {
         val request = Request.Builder()
             .url(url)
             .header("Accept", "application/json, */*")
+            // 清单必须拿最新的，不能被任何中间层缓存
+            .header("Cache-Control", "no-cache")
             .build()
 
         val body = try {
@@ -102,7 +104,17 @@ class ManifestRepository {
             if (m.isNotBlank()) music.add(joinUrl(base, m))
         }
 
-        return Album(photos, music)
+        return Album(photos, music, versionOf(photos))
+    }
+
+    /**
+     * 用照片路径列表算版本号。只有清单内容变化时才变，
+     * 因此换照片会刷新缓存、不换照片不会白白重下。
+     */
+    private fun versionOf(photos: List<Photo>): String {
+        var acc = 17
+        for (p in photos) acc = acc * 31 + p.url.hashCode()
+        return "${photos.size}-${acc}"
     }
 
     private fun buildPhoto(base: String, rel: String, taken: String?, w: Int, h: Int): Photo =
