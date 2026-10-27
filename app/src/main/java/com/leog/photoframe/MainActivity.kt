@@ -197,6 +197,7 @@ class MainActivity : AppCompatActivity() {
 
                 music.setPlaylist(album.music)
                 music.setVolume(Prefs.volume / 100f)
+                music.trimCache()
 
                 showStatus(null)
                 flashHint("共 ${album.photos.size} 张照片")
